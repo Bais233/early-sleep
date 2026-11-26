@@ -51,6 +51,23 @@ App 不是单一页面，目前已搭好多页面框架：
 
 产物：`app/build/outputs/apk/debug/app-debug.apk`
 
+### Release 构建
+
+根目录的 `keystore.properties` 用于配置签名（已被 `.gitignore` 忽略，不会入库）：
+
+```properties
+storeFile=keystore/earlysleep-release.jks
+storePassword=你的密码
+keyAlias=earlysleep
+keyPassword=你的密码
+```
+
+```bash
+./gradlew assembleRelease
+```
+
+产物：`app/build/outputs/apk/release/app-release.apk`（已开启 R8 混淆与资源裁剪）
+
 安装到手机（开启 USB 调试）：
 
 ```bash

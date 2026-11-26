@@ -12,3 +12,9 @@ captures/
 *.ap_
 *.dex
 *.class
+
+# 签名文件不入库
+keystore.properties
+keystore/
+*.jks
+*.keystore
