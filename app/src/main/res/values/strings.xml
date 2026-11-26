@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">早点睡</string>
+    <string name="notification_channel_name">入睡提醒</string>
+    <string name="notification_channel_description">每天 23:00 提醒你放下手机，准时入睡</string>
+    <string name="notification_title">23:00 了，该睡觉啦</string>
+    <string name="notification_body">放下手机，立刻去睡。23:00 前入睡，是对明天最好的投资。</string>
+    <string name="action_check_in">已入睡</string>
+    <string name="action_snooze">再等 10 分钟</string>
+</resources>
