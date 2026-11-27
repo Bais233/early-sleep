@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Alarm
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Notifications
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -54,15 +57,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import com.earlysleep.app.BuildConfig
 import com.earlysleep.app.alarm.SleepAlarmScheduler
 import com.earlysleep.app.ui.components.SleepCard
-import com.earlysleep.app.ui.theme.Lavender
-import com.earlysleep.app.ui.theme.Mint
-import com.earlysleep.app.ui.theme.NightSurfaceHigh
-import com.earlysleep.app.ui.theme.OutlineNight
-import com.earlysleep.app.ui.theme.TextPrimary
-import com.earlysleep.app.ui.theme.TextSecondary
-import com.earlysleep.app.ui.theme.WarningOrange
 import java.time.LocalDate
 
 @Composable
@@ -71,8 +68,10 @@ fun SettingsScreen(
     checkInCount: Int,
     onToggleReminder: (Boolean) -> Unit,
     onClearCheckIns: () -> Unit,
+    onOpenAbout: () -> Unit,
 ) {
     val context = LocalContext.current
+    val scheme = MaterialTheme.colorScheme
     var refresh by remember { mutableIntStateOf(0) }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { refresh++ }
 
@@ -94,7 +93,7 @@ fun SettingsScreen(
             text = "设置",
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            color = scheme.onBackground
         )
         Spacer(Modifier.height(20.dp))
 
@@ -109,16 +108,16 @@ fun SettingsScreen(
                     checked = remindersEnabled,
                     onCheckedChange = onToggleReminder,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color(0xFF06281F),
-                        checkedTrackColor = Mint,
-                        uncheckedThumbColor = TextSecondary,
-                        uncheckedTrackColor = NightSurfaceHigh,
-                        uncheckedBorderColor = OutlineNight
+                        checkedThumbColor = scheme.onSecondary,
+                        checkedTrackColor = scheme.secondary,
+                        uncheckedThumbColor = scheme.onSurfaceVariant,
+                        uncheckedTrackColor = scheme.surfaceVariant,
+                        uncheckedBorderColor = scheme.outline
                     )
                 )
             }
 
-            HorizontalDivider(color = Color.White.copy(alpha = 0.05f))
+            HorizontalDivider(color = scheme.outline.copy(alpha = 0.25f))
 
             SettingRow(
                 icon = Icons.Rounded.Notifications,
@@ -126,16 +125,16 @@ fun SettingsScreen(
                 subtitle = if (notificationsGranted) "已开启，可收到入睡提醒" else "未开启，到点收不到提醒"
             ) {
                 if (notificationsGranted) {
-                    StatusPill("已开启", Mint)
+                    StatusPill("已开启", scheme.secondary)
                 } else {
                     TextButton(onClick = { openNotificationSettings(context) }) {
-                        Text(text = "去开启", fontSize = 12.sp, color = WarningOrange)
+                        Text(text = "去开启", fontSize = 12.sp, color = scheme.tertiary)
                     }
                 }
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                HorizontalDivider(color = Color.White.copy(alpha = 0.05f))
+                HorizontalDivider(color = scheme.outline.copy(alpha = 0.25f))
 
                 SettingRow(
                     icon = Icons.Rounded.Alarm,
@@ -143,10 +142,10 @@ fun SettingsScreen(
                     subtitle = if (exactAlarmGranted) "已开启，23:00 准时提醒" else "未开启时提醒可能延迟几分钟"
                 ) {
                     if (exactAlarmGranted) {
-                        StatusPill("已开启", Mint)
+                        StatusPill("已开启", scheme.secondary)
                     } else {
                         TextButton(onClick = { openExactAlarmSettings(context) }) {
-                            Text(text = "去开启", fontSize = 12.sp, color = WarningOrange)
+                            Text(text = "去开启", fontSize = 12.sp, color = scheme.tertiary)
                         }
                     }
                 }
@@ -169,7 +168,7 @@ fun SettingsScreen(
                     Text(
                         text = "清空",
                         fontSize = 12.sp,
-                        color = if (checkInCount > 0) WarningOrange else TextSecondary
+                        color = if (checkInCount > 0) scheme.tertiary else scheme.onSurfaceVariant
                     )
                 }
             }
@@ -182,16 +181,16 @@ fun SettingsScreen(
             SettingRow(
                 icon = Icons.Rounded.Info,
                 title = "关于早点睡",
-                subtitle = "版本 1.0.0 · 支持 Android 9 及以上"
-            )
-            HorizontalDivider(color = Color.White.copy(alpha = 0.05f))
-            Text(
-                text = "坚持 23:00 前入睡。后续版本将加入白噪音助眠、睡眠时长统计、睡前专注模式等功能。",
-                fontSize = 12.sp,
-                color = TextSecondary,
-                lineHeight = 19.sp,
-                modifier = Modifier.padding(top = 12.dp, bottom = 6.dp)
-            )
+                subtitle = "版本 ${BuildConfig.VERSION_NAME} · 支持 Android 9 及以上",
+                onClick = onOpenAbout
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.ChevronRight,
+                    contentDescription = null,
+                    tint = scheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
 
         Spacer(Modifier.height(24.dp))
@@ -200,7 +199,7 @@ fun SettingsScreen(
             text = "23:00 前入睡，是对明天最好的投资。",
             modifier = Modifier.fillMaxWidth(),
             fontSize = 12.sp,
-            color = TextSecondary,
+            color = scheme.onSurfaceVariant,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
     }
@@ -208,9 +207,9 @@ fun SettingsScreen(
     if (showClearDialog) {
         AlertDialog(
             onDismissRequest = { showClearDialog = false },
-            containerColor = NightSurfaceHigh,
-            title = { Text(text = "清空打卡记录？", color = TextPrimary) },
-            text = { Text(text = "所有早睡打卡记录将被删除，且无法恢复。", color = TextSecondary) },
+            containerColor = scheme.surfaceVariant,
+            title = { Text(text = "清空打卡记录？", color = scheme.onBackground) },
+            text = { Text(text = "所有早睡打卡记录将被删除，且无法恢复。", color = scheme.onSurfaceVariant) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -218,12 +217,12 @@ fun SettingsScreen(
                         showClearDialog = false
                     }
                 ) {
-                    Text(text = "清空", color = WarningOrange)
+                    Text(text = "清空", color = scheme.tertiary)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showClearDialog = false }) {
-                    Text(text = "取消", color = TextSecondary)
+                    Text(text = "取消", color = scheme.onSurfaceVariant)
                 }
             }
         )
@@ -236,7 +235,7 @@ private fun SectionLabel(text: String) {
         text = text,
         fontSize = 13.sp,
         fontWeight = FontWeight.Medium,
-        color = TextSecondary,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
     )
 }
@@ -246,11 +245,14 @@ private fun SettingRow(
     icon: ImageVector,
     title: String,
     subtitle: String? = null,
+    onClick: (() -> Unit)? = null,
     trailing: @Composable () -> Unit = {},
 ) {
+    val scheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -258,13 +260,13 @@ private fun SettingRow(
             modifier = Modifier
                 .size(38.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Lavender.copy(alpha = 0.10f)),
+                .background(scheme.primary.copy(alpha = 0.10f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Lavender,
+                tint = scheme.primary,
                 modifier = Modifier.size(19.dp)
             )
         }
@@ -274,13 +276,13 @@ private fun SettingRow(
                 text = title,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = TextPrimary
+                color = scheme.onBackground
             )
             if (subtitle != null) {
                 Text(
                     text = subtitle,
                     fontSize = 12.sp,
-                    color = TextSecondary,
+                    color = scheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }

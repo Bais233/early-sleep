@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.LocalFireDepartment
 import androidx.compose.material.icons.rounded.NightsStay
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -38,10 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.earlysleep.app.data.calculateStreak
 import com.earlysleep.app.ui.components.SleepCard
-import com.earlysleep.app.ui.theme.Lavender
-import com.earlysleep.app.ui.theme.Mint
-import com.earlysleep.app.ui.theme.TextPrimary
-import com.earlysleep.app.ui.theme.TextSecondary
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -49,6 +46,7 @@ import java.util.Locale
 
 @Composable
 fun RecordsScreen(checkIns: Set<LocalDate>) {
+    val scheme = MaterialTheme.colorScheme
     val today = LocalDate.now()
     val streak = calculateStreak(checkIns, today)
     val lastSevenDays = remember(today) { (6 downTo 0).map { today.minusDays(it.toLong()) } }
@@ -69,13 +67,13 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
             text = "早睡记录",
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            color = scheme.onBackground
         )
         Spacer(Modifier.height(6.dp))
         Text(
             text = "每一个早睡的夜晚，都在为明天充电",
             fontSize = 13.sp,
-            color = TextSecondary
+            color = scheme.onSurfaceVariant
         )
 
         Spacer(Modifier.height(20.dp))
@@ -83,20 +81,20 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
         SleepCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "连续早睡", fontSize = 13.sp, color = TextSecondary)
+                    Text(text = "连续早睡", fontSize = 13.sp, color = scheme.onSurfaceVariant)
                     Spacer(Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                             text = "$streak",
                             fontSize = 42.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Mint
+                            color = scheme.secondary
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
                             text = "天",
                             fontSize = 14.sp,
-                            color = TextSecondary,
+                            color = scheme.onSurfaceVariant,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                     }
@@ -104,18 +102,18 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
                 Icon(
                     imageVector = Icons.Rounded.LocalFireDepartment,
                     contentDescription = null,
-                    tint = Mint,
+                    tint = scheme.secondary,
                     modifier = Modifier.size(40.dp)
                 )
             }
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 12.dp),
-                color = Color.White.copy(alpha = 0.06f)
+                color = scheme.outline.copy(alpha = 0.3f)
             )
             Text(
                 text = "本月已打卡 $monthCheckIns 天 · 累计 ${checkIns.size} 天",
                 fontSize = 12.sp,
-                color = TextSecondary
+                color = scheme.onSurfaceVariant
             )
         }
 
@@ -126,7 +124,7 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
                 text = "最近 7 天",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = TextPrimary
+                color = scheme.onBackground
             )
             Spacer(Modifier.height(14.dp))
             Row(
@@ -142,7 +140,7 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
                         Text(
                             text = weekdayLabel(date.dayOfWeek),
                             fontSize = 11.sp,
-                            color = if (date == today) Mint else TextSecondary
+                            color = if (date == today) scheme.secondary else scheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(6.dp))
                         Box(
@@ -150,11 +148,11 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
                                 .size(36.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    if (checked) Mint else Color.White.copy(alpha = 0.04f)
+                                    if (checked) scheme.secondary else scheme.onSurface.copy(alpha = 0.05f)
                                 )
                                 .then(
                                     if (date == today) {
-                                        Modifier.border(1.dp, Lavender, CircleShape)
+                                        Modifier.border(1.dp, scheme.primary, CircleShape)
                                     } else {
                                         Modifier
                                     }
@@ -165,14 +163,14 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
                                 Icon(
                                     imageVector = Icons.Rounded.Check,
                                     contentDescription = null,
-                                    tint = Color(0xFF06281F),
+                                    tint = scheme.onSecondary,
                                     modifier = Modifier.size(18.dp)
                                 )
                             } else {
                                 Text(
                                     text = "${date.dayOfMonth}",
                                     fontSize = 12.sp,
-                                    color = TextSecondary
+                                    color = scheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -187,7 +185,7 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
             text = "打卡历史",
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
-            color = TextPrimary,
+            color = scheme.onBackground,
             modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
         )
 
@@ -202,20 +200,20 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
                     Icon(
                         imageVector = Icons.Rounded.NightsStay,
                         contentDescription = null,
-                        tint = TextSecondary,
+                        tint = scheme.onSurfaceVariant,
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(Modifier.height(10.dp))
                     Text(
                         text = "还没有打卡记录",
                         fontSize = 14.sp,
-                        color = TextPrimary
+                        color = scheme.onBackground
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = "今晚 23:00 前入睡，点下「今晚已入睡」",
                         fontSize = 12.sp,
-                        color = TextSecondary,
+                        color = scheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -233,13 +231,13 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
                             modifier = Modifier
                                 .size(34.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(Lavender.copy(alpha = 0.10f)),
+                                .background(scheme.primary.copy(alpha = 0.10f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Bedtime,
                                 contentDescription = null,
-                                tint = Lavender,
+                                tint = scheme.primary,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -247,17 +245,17 @@ fun RecordsScreen(checkIns: Set<LocalDate>) {
                         Text(
                             text = date.format(dateFormatter),
                             fontSize = 14.sp,
-                            color = TextPrimary,
+                            color = scheme.onBackground,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
                             text = "已打卡",
                             fontSize = 12.sp,
-                            color = Mint
+                            color = scheme.secondary
                         )
                     }
                     if (index != recentCheckIns.lastIndex) {
-                        HorizontalDivider(color = Color.White.copy(alpha = 0.05f))
+                        HorizontalDivider(color = scheme.outline.copy(alpha = 0.25f))
                     }
                 }
             }

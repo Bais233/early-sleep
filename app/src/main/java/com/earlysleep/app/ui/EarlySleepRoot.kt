@@ -14,6 +14,7 @@ import androidx.compose.material.icons.rounded.Bedtime
 import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -36,12 +37,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.earlysleep.app.ui.components.NightBackground
+import com.earlysleep.app.ui.screens.AboutScreen
 import com.earlysleep.app.ui.screens.HomeScreen
 import com.earlysleep.app.ui.screens.RecordsScreen
 import com.earlysleep.app.ui.screens.SettingsScreen
-import com.earlysleep.app.ui.theme.Mint
-import com.earlysleep.app.ui.theme.NightSurface
-import com.earlysleep.app.ui.theme.TextSecondary
+
+private const val ABOUT_ROUTE = "about"
 
 enum class AppDestination(
     val route: String,
@@ -58,6 +59,7 @@ fun EarlySleepRoot(viewModel: SleepViewModel) {
     val context = LocalContext.current
     val remindersEnabled by viewModel.remindersEnabled.collectAsStateWithLifecycle()
     val checkIns by viewModel.checkInDates.collectAsStateWithLifecycle()
+    val scheme = MaterialTheme.colorScheme
 
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -84,40 +86,42 @@ fun EarlySleepRoot(viewModel: SleepViewModel) {
         Scaffold(
             containerColor = Color.Transparent,
             bottomBar = {
-                NavigationBar(
-                    containerColor = NightSurface.copy(alpha = 0.96f),
-                    tonalElevation = 0.dp
-                ) {
-                    AppDestination.entries.forEach { destination ->
-                        NavigationBarItem(
-                            selected = currentRoute == destination.route,
-                            onClick = {
-                                navController.navigate(destination.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                if (currentRoute != ABOUT_ROUTE) {
+                    NavigationBar(
+                        containerColor = scheme.surface.copy(alpha = 0.96f),
+                        tonalElevation = 0.dp
+                    ) {
+                        AppDestination.entries.forEach { destination ->
+                            NavigationBarItem(
+                                selected = currentRoute == destination.route,
+                                onClick = {
+                                    navController.navigate(destination.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = destination.icon,
-                                    contentDescription = destination.label,
-                                    modifier = Modifier.size(23.dp)
+                                },
+                                icon = {
+                                    Icon(
+                                        imageVector = destination.icon,
+                                        contentDescription = destination.label,
+                                        modifier = Modifier.size(23.dp)
+                                    )
+                                },
+                                label = {
+                                    Text(text = destination.label, fontSize = 11.sp)
+                                },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = scheme.secondary,
+                                    selectedTextColor = scheme.secondary,
+                                    indicatorColor = scheme.secondary.copy(alpha = 0.12f),
+                                    unselectedIconColor = scheme.onSurfaceVariant,
+                                    unselectedTextColor = scheme.onSurfaceVariant
                                 )
-                            },
-                            label = {
-                                Text(text = destination.label, fontSize = 11.sp)
-                            },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Mint,
-                                selectedTextColor = Mint,
-                                indicatorColor = Mint.copy(alpha = 0.12f),
-                                unselectedIconColor = TextSecondary,
-                                unselectedTextColor = TextSecondary
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -143,8 +147,12 @@ fun EarlySleepRoot(viewModel: SleepViewModel) {
                         remindersEnabled = remindersEnabled,
                         checkInCount = checkIns.size,
                         onToggleReminder = viewModel::setRemindersEnabled,
-                        onClearCheckIns = viewModel::clearCheckIns
+                        onClearCheckIns = viewModel::clearCheckIns,
+                        onOpenAbout = { navController.navigate(ABOUT_ROUTE) }
                     )
+                }
+                composable(ABOUT_ROUTE) {
+                    AboutScreen(onBack = { navController.popBackStack() })
                 }
             }
         }

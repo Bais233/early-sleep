@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.earlysleep.app.data.SleepPrefs
 import com.earlysleep.app.notifications.SleepNotifications
+import java.time.LocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -30,8 +31,13 @@ class SleepReminderReceiver : BroadcastReceiver() {
                     }
 
                     else -> {
-                        if (prefs.remindersEnabled.first()) {
+                        val enabled = prefs.remindersEnabled.first()
+                        val alreadyCheckedIn = prefs.checkInDates.first()
+                            .contains(LocalDate.now())
+                        if (enabled && !alreadyCheckedIn) {
                             SleepNotifications.showBedtimeReminder(appContext)
+                        }
+                        if (enabled) {
                             // 每次触发后重新排下一天的闹钟，避免长期运行后时间漂移。
                             SleepAlarmScheduler.scheduleDaily(appContext)
                         }

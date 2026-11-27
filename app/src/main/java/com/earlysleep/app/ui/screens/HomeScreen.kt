@@ -3,6 +3,7 @@ package com.earlysleep.app.ui.screens
 import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,11 +24,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bedtime
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.TipsAndUpdates
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -55,13 +58,6 @@ import androidx.compose.ui.unit.sp
 import com.earlysleep.app.alarm.SleepAlarmScheduler
 import com.earlysleep.app.data.calculateStreak
 import com.earlysleep.app.ui.components.SleepCard
-import com.earlysleep.app.ui.theme.Lavender
-import com.earlysleep.app.ui.theme.Mint
-import com.earlysleep.app.ui.theme.NightSurfaceHigh
-import com.earlysleep.app.ui.theme.OutlineNight
-import com.earlysleep.app.ui.theme.TextPrimary
-import com.earlysleep.app.ui.theme.TextSecondary
-import com.earlysleep.app.ui.theme.WarningOrange
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -86,6 +82,8 @@ fun HomeScreen(
     onCheckIn: () -> Unit,
 ) {
     val context = LocalContext.current
+    val scheme = MaterialTheme.colorScheme
+    val darkTheme = isSystemInDarkTheme()
     var now by remember { mutableStateOf(LocalDateTime.now()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -144,26 +142,26 @@ fun HomeScreen(
                     text = greeting,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = scheme.onBackground
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = now.format(dateFormatter),
                     fontSize = 13.sp,
-                    color = TextSecondary
+                    color = scheme.onSurfaceVariant
                 )
             }
             Box(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.06f)),
+                    .background(scheme.primary.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.DarkMode,
-                    contentDescription = null,
-                    tint = Lavender,
+                    imageVector = if (darkTheme) Icons.Rounded.DarkMode else Icons.Rounded.LightMode,
+                    contentDescription = if (darkTheme) "当前为深色模式" else "当前为浅色模式",
+                    tint = scheme.primary,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -180,7 +178,7 @@ fun HomeScreen(
                 val inset = strokeWidth / 2f
                 val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
                 drawArc(
-                    color = Color.White.copy(alpha = 0.07f),
+                    color = scheme.onSurface.copy(alpha = 0.08f),
                     startAngle = -90f,
                     sweepAngle = 360f,
                     useCenter = false,
@@ -189,7 +187,7 @@ fun HomeScreen(
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
                 drawArc(
-                    brush = Brush.sweepGradient(listOf(Mint, Lavender, Mint)),
+                    brush = Brush.sweepGradient(listOf(scheme.secondary, scheme.primary, scheme.secondary)),
                     startAngle = -90f,
                     sweepAngle = 360f * progress,
                     useCenter = false,
@@ -202,7 +200,7 @@ fun HomeScreen(
                 Text(
                     text = if (overdue) "已超过建议入睡时间" else "距离 23:00 入睡",
                     fontSize = 13.sp,
-                    color = TextSecondary
+                    color = scheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -210,14 +208,14 @@ fun HomeScreen(
                     fontSize = 42.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    color = if (overdue) WarningOrange else TextPrimary,
+                    color = if (overdue) scheme.tertiary else scheme.onBackground,
                     letterSpacing = 1.sp
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = if (overdue) "放下手机，立刻去睡" else "今晚也要在 23:00 前入睡",
                     fontSize = 12.sp,
-                    color = if (overdue) WarningOrange else TextSecondary
+                    color = if (overdue) scheme.tertiary else scheme.onSurfaceVariant
                 )
             }
         }
@@ -231,7 +229,7 @@ fun HomeScreen(
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
-                    .background(Color.White.copy(alpha = 0.05f))
+                    .background(scheme.onSurface.copy(alpha = 0.06f))
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -239,13 +237,13 @@ fun HomeScreen(
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(if (remindersEnabled) Mint else TextSecondary)
+                        .background(if (remindersEnabled) scheme.secondary else scheme.onSurfaceVariant)
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
                     text = if (remindersEnabled) "每日 23:00 提醒已开启" else "每日提醒未开启",
                     fontSize = 12.sp,
-                    color = if (remindersEnabled) Mint else TextSecondary
+                    color = if (remindersEnabled) scheme.secondary else scheme.onSurfaceVariant
                 )
             }
         }
@@ -265,10 +263,10 @@ fun HomeScreen(
                 .height(54.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Mint,
-                contentColor = Color(0xFF06281F),
-                disabledContainerColor = NightSurfaceHigh,
-                disabledContentColor = TextSecondary
+                containerColor = scheme.secondary,
+                contentColor = scheme.onSecondary,
+                disabledContainerColor = scheme.surfaceVariant,
+                disabledContentColor = scheme.onSurfaceVariant
             )
         ) {
             Icon(
@@ -295,7 +293,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             fontSize = 12.sp,
-            color = TextSecondary
+            color = scheme.onSurfaceVariant
         )
 
         Spacer(Modifier.height(20.dp))
@@ -306,13 +304,13 @@ fun HomeScreen(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Lavender.copy(alpha = 0.12f)),
+                        .background(scheme.primary.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.NotificationsActive,
                         contentDescription = null,
-                        tint = Lavender,
+                        tint = scheme.primary,
                         modifier = Modifier.size(21.dp)
                     )
                 }
@@ -322,23 +320,23 @@ fun HomeScreen(
                         text = "每日入睡提醒",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
-                        color = TextPrimary
+                        color = scheme.onBackground
                     )
                     Text(
                         text = if (remindersEnabled) "每天 23:00 · 已开启" else "每天 23:00 · 已关闭",
                         fontSize = 12.sp,
-                        color = TextSecondary
+                        color = scheme.onSurfaceVariant
                     )
                 }
                 Switch(
                     checked = remindersEnabled,
                     onCheckedChange = onToggleReminder,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color(0xFF06281F),
-                        checkedTrackColor = Mint,
-                        uncheckedThumbColor = TextSecondary,
-                        uncheckedTrackColor = NightSurfaceHigh,
-                        uncheckedBorderColor = OutlineNight
+                        checkedThumbColor = scheme.onSecondary,
+                        checkedTrackColor = scheme.secondary,
+                        uncheckedThumbColor = scheme.onSurfaceVariant,
+                        uncheckedTrackColor = scheme.surfaceVariant,
+                        uncheckedBorderColor = scheme.outline
                     )
                 )
             }
@@ -352,13 +350,13 @@ fun HomeScreen(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Mint.copy(alpha = 0.10f)),
+                        .background(scheme.secondary.copy(alpha = 0.10f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.TipsAndUpdates,
                         contentDescription = null,
-                        tint = Mint,
+                        tint = scheme.secondary,
                         modifier = Modifier.size(19.dp)
                     )
                 }
@@ -368,13 +366,13 @@ fun HomeScreen(
                         text = "睡眠小贴士",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Mint
+                        color = scheme.secondary
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = tip,
                         fontSize = 12.sp,
-                        color = TextSecondary,
+                        color = scheme.onSurfaceVariant,
                         lineHeight = 19.sp
                     )
                 }
